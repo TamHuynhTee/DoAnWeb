@@ -1,0 +1,279 @@
+﻿@model NhaThuoc.Models.Thuoc
+@using NhaThuoc.Models
+@{
+    int kh = -1;
+    if (User.Identity.IsAuthenticated)
+    {
+        if (User.IsInRole("user"))
+        {
+            NHATHUOCEntities db = new NHATHUOCEntities();
+            kh = (from u in db.KhachHangs where u.Username == User.Identity.Name select u.MaKH).FirstOrDefault();
+        }
+    }
+}
+<div class="content">
+    <div class="detail">
+        <div id="head">
+            <h4>
+                Thông tin sản phẩm
+            </h4>
+        </div>
+        <div class="image">
+            <img id="item-img" src="@Model.AnhMinhHoa" />
+        </div>
+        <div id="info">
+            <p><label>Tên thuốc:</label> @Model.TenSP</p>
+            <p><label>Loại:</label> @Model.Loai1.TenLoai</p>
+            <p><label>Ngày SX:</label> @Model.NgaySX.Value.ToString("dd-MM-yyyy")</p>
+            <p><label>Hạn SD:</label> @Model.HanSD.Value.ToString("dd-MM-yyyy")</p>
+            <p style="color:red;font-size:20px;">@Model.DonGia.Value.ToString("0#,0") đồng</p>
+            <input id="quantity" type="number" value="0" min="1" max="100" />
+            <button class="btn btn-primary" onclick="AddtoCartinDetail(@Model.MaSP, @kh)"><i class="glyphicon glyphicon-shopping-cart"></i> Thêm vào giỏ</button>
+        </div>
+    </div>
+    <div class="review">
+        <div id="head">
+            <h4>
+                Đánh giá sản phẩm
+            </h4>
+        </div>
+
+        <div id="body">
+            @{
+                Html.RenderAction("Review", "Thuoc", new { id = Model.MaSP });
+            }
+        </div>
+        <div id="add-review">
+            <input id="reviewContent" type="text" placeholder="Thêm bình luận" value="" />
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button id="post" onclick="postReview()">Đăng</button>
+            }
+            else
+            {
+                <button id="post" onclick="return confirm('Vui lòng đăng nhập để bình luận')">Đăng</button>
+            }
+
+        </div>
+    </div>
+    <div class="describe">
+        <div id="head">
+            <h4>
+                Mô tả
+            </h4>
+        </div>
+        <div style="width:100%; height: 116px; padding: 5px 10px; text-align: left;">
+            @Model.CongDung
+        </div>
+    </div>
+    <div class="relevant">
+
+    </div>
+</div>
+
+<input hidden value="@Model.MaSP" id="id" />
+<input hidden value="@User.Identity.Name" id="user" />
+
+<script type="text/javascript">
+    // Add item to cart
+    var AddtoCartinDetail = function (sp, kh) {
+        // check authentication
+        if (kh == -1) {
+            return alert('Bạn cần đăng nhập để mua hàng.');
+        }
+        else {
+            // check quantity > 0
+            var sl = $('#quantity').val();
+            if (sl <= 0) {
+                return alert('Bạn chưa chọn số lượng.');
+            }
+            else {
+                // confirm add
+                if (confirm('Thêm vào giỏ hàng?')) {
+                    $.ajax({
+                        type: "POST",
+                        dataType: "JSON",
+                        url: "/GioHang/AddtoCart",
+                        data: {
+                            makh: kh,
+                            masp: sp,
+                            soluong: sl
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                $('#cart-count').text(response.count);
+                                alert(response.responseText);
+                            } else {
+                                alert(response.responseText);
+                            }
+                        },
+                        error: function (jqXHR, exception) {
+                            alert('Đang có lỗi, mong quý khách thông cảm!');
+                        }
+                    })
+                }
+            }
+        }
+    }
+    // Post review
+    var postReview = function () {
+        var reviewContent = $('#reviewContent').val();
+        // Post if content is not empty
+        if (reviewContent != "") {
+            var id = $('#id').val();
+            var kh = $('#user').val();
+            $.ajax({
+                url: "/Thuoc/AddReview",
+                type: "post",
+                dataType: "JSON",
+                data: {
+                    id: id,
+                    kh: kh,
+                    reviewtxt: reviewContent
+                },
+                success: function (response) {
+                    var add = document.getElementById('body');
+                    add.insertAdjacentHTML('afterbegin', '<div id="comment"><label style="color:blue;">' + response.user + '</label>&emsp;<label>' + response.time + '</label><p>' + response.reviewtxt + '</p></div>');
+                    $('#reviewContent').val("");
+                }
+            })
+        }
+    }
+</script>
+
+<style>
+    .content {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        font-family: 'Times New Roman';
+        font-size: 17px;
+        color: black;
+    }
+
+    .detail .image img {
+        height: 100%;
+        width: 100%;
+    }
+
+    .detail .image {
+        height: 95%;
+        width: 55%;
+        border: 1px solid #d6d0d0;
+    }
+
+    .detail {
+        width: 59%;
+        height: 69%;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    #info {
+        width: 40%;
+        height: 95%;
+        text-align: left;
+    }
+
+        #info input[type="number"] {
+            border: 1px solid black;
+            width: 20%;
+            border-radius: 5px;
+            height: 10%;
+        }
+
+        #info button {
+            width: 70%;
+            height: 10%;
+        }
+
+    .review {
+        width: 39%;
+        height: 69%;
+    }
+
+    .describe {
+        width: 59%;
+        height: 29%;
+    }
+
+    .relevant {
+        width: 39%;
+        height: 29%;
+    }
+
+    .content > div {
+        border-radius: 5px;
+        border: 2px solid black;
+    }
+
+    #head {
+        width: 100%;
+        height: 25px;
+        background-color: black;
+        color: white;
+        text-align: center;
+    }
+
+        #head h4 {
+            margin: 0;
+        }
+
+    #body {
+        width: 100%;
+        height: 83%;
+        padding: 10px;
+        overflow: auto;
+    }
+
+    .review #body {
+        background-color: beige;
+    }
+
+    #add-review {
+        height: 9%;
+        width: 100%;
+        background-color: transparent;
+        padding: 0 5px;
+    }
+
+        #add-review input {
+            width: 76%;
+            height: 100%;
+            border: 1px solid black;
+        }
+
+        #add-review button {
+            width: 20%;
+            height: 100%;
+            border-radius: 0;
+            border: 1px solid black;
+            background-color: green;
+            color: white;
+        }
+
+            #add-review button:hover,
+            #add-review button:focus {
+                background-color: forestgreen;
+            }
+
+    #post, #reviewContent {
+        display: inline;
+    }
+
+    #comment {
+        margin-bottom: 5px;
+        border-radius: 5px;
+        border: 1px solid gray;
+        background-color: aliceblue;
+        padding: 0 5px;
+    }
+
+    .detail, .describe, .review, .relevant {
+        background-color: white;
+    }
+</style>

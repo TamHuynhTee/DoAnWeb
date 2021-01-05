@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        /* Header */
+        body {
+            font-family: 'Roboto';
+            min-height: 550px;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            width: 100%;
+            height: 50px;
+            top: 0;
+            position: fixed;
+            background-color: #e9feff;
+            color: black;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid black;
+            font-weight: bold;
+            z-index: 4;
+        }
+
+            .header div {
+                height: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+                .header div button {
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
+
+        .cart, .login {
+            padding: 0 15px;
+            width: 40%;
+        }
+
+            .cart button:hover,
+            .cart button:focus,
+            .login button:hover,
+            .login button:focus {
+                color: red;
+            }
+
+        .logo {
+            width: 20%;
+            justify-content: space-around;
+        }
+
+        .login {
+            flex-flow: row-reverse;
+        }
+        /* Footer */
+        footer {
+            border-top: 2px solid black;
+            bottom: 0;
+            position: fixed;
+            height: 30px;
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: white;
+            font-weight: bold;
+        }
+
+            footer h4 {
+                color: #e74424;
+                font-weight: bold;
+            }
+
+            footer a {
+                color: black;
+            }
+
+        .dropdown-menu ul li {
+            background-color: white;
+            color: black;
+        }
+
+        #cart-count {
+            color: red;
+        }
+    </style>
+
+    @using NhaThuoc.Models
+    @{
+        int kh = -1, cart_count = 0;
+        string avatar = "";
+        if (User.Identity.IsAuthenticated)
+        {
+            NHATHUOCEntities db = new NHATHUOCEntities();
+
+            if (User.IsInRole("user"))
+            {
+                kh = (from u in db.KhachHangs where u.Username == User.Identity.Name select u.MaKH).FirstOrDefault();
+                cart_count = (from u in db.GioHangs where u.MaKH == kh && u.MaHD == null select u).Count();
+            }
+            string role = (from u in db.TaiKhoans where u.Username == User.Identity.Name select u.Role).FirstOrDefault();
+            if (role == "admin")
+            {
+                avatar = (from u in db.Admins where u.Username == User.Identity.Name select u.AnhDaiDien).FirstOrDefault();
+            }
+            else
+            {
+                avatar = (from u in db.KhachHangs where u.Username == User.Identity.Name select u.AnhDaiDien).FirstOrDefault();
+            }
+        }
+    }
+</head>
+<body>
+    <div class="header">
+        <div class="cart">
+            @if (User.IsInRole("admin"))
+            {
+                <button onclick="location.href='/Home/Revenue'"><i class="glyphicon glyphicon-usd"></i> Doanh thu</button>
+            }
+            else
+            {
+                <button onclick="CartDetail(@kh)"><i class="glyphicon glyphicon-shopping-cart"></i> Giỏ hàng (<span id="cart-count">@cart_count</span>)</button>
+            }
+        </div>
+        <div class="logo">
+            <button onclick="location.href='/Home/Index'"><img src="~/images/icon.png" height="45" width="45" /></button>
+        </div>
+        <div class="login">
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button onclick="location.href='/Account/Logout'" style="color:red;"><i class="glyphicon glyphicon-log-out"></i> Đăng xuất</button>
+                if (User.IsInRole("admin"))
+                {
+                    <button onclick="location.href='@Url.Action("Admin", "Home")'"><i class="glyphicon glyphicon-th-list"></i> Quản lý</button>
+                }
+                <button onclick="location.href='@Url.Action("_Profile", "Account")'"><img src="@avatar" class="img-circle" height="40" width="40" /> @User.Identity.Name</button>
+            }
+            else
+            {
+                <button onclick="location.href='/Account/Login'"><i class="glyphicon glyphicon-log-in"></i> Đăng nhập</button>
+                <button onclick="location.href='/Account/Register'"><i class="glyphicon glyphicon-plus"></i> Đăng ký</button>
+            }
+        </div>
+    </div>
+    <div>
+        @RenderBody()
+    </div>
+    <footer>
+        <h4>&copy; @DateTime.Now.Year - New Heart Pharmacy</h4>
+        <a href="@Url.Action("Support","Home")">Support</a>
+        <a href="@Url.Action("Feedback","Home")">Feedback</a>
+        <a href="@Url.Action("About","Home")">About</a>
+        <a href="@Url.Action("Policy","Home")">Policy</a>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+    <!-- Cart modal -->
+    <div class="modal fade" id="cart-detail">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="modal-header" class="modal-header" style="display: flex; align-items: center; justify-content: space-between; font-family: 'Times New Roman'; background-color: bisque;">
+                    <h3 style="margin:0;">Giỏ hàng</h3>
+                </div>
+                <div style="background-color: white;" class="modal-body" id="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // Show cart
+        var CartDetail = function (customerID) {
+            if (customerID == -1) {
+                return alert('Bạn cần đăng nhập để xem giỏ hàng');
+            }
+            else {
+                $.ajax({
+                    type: "GET",
+                    url: "/GioHang/Index",
+                    data: { makh: customerID },
+                    success: function (response) {
+                        $('#cart-detail #modal-header').html('<h3 style="margin: 0;">Giỏ hàng</h3>');
+                        $('#cart-detail #modal-body').html(response);
+                        $('#cart-detail').modal('show');
+                    }
+                })
+            }
+        }
+    </script>
+</body>
+</html>

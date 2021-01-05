@@ -1,0 +1,110 @@
+﻿
+<div class="add-btn">
+    <div class="notify">
+
+    </div>
+    <div class="butn">
+        <button id="add-save">Thêm</button>
+    </div>
+</div>
+<div class="add-zone">
+    <div>
+        <label>Tên tài khoản</label>
+        <input class="form-control" placeholder="Tên tài khoản" id="username" value="" type="text" maxlength="50"/>
+        <label>Mật khẩu</label>
+        <input class="form-control" placeholder="Mật khẩu" id="password" value="" type="password" maxlength="50"/>
+        <label>Email</label>
+        <input class="form-control" placeholder="Email" id="email" value="" type="email" maxlength="50"/>
+    </div>
+</div>
+
+<script>
+    $('#add-save').click(function () {
+        // declaration
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var email = $('#email').val();
+        // validation
+        if (username == "") {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập tên tài khoản</p>"); return;
+        } else if (password == "") {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập mật khẩu</p>"); return;
+        } else if (email == "") {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập email</p>"); return;
+        } else {
+            $.ajax({
+                url: "/Account/Add",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    username: username,
+                    password: password,
+                    email: email
+                },
+                success: function (response) {
+                    $('.notify').html("<p style='color:green;font-size:20px;'>" + response.message + "</p>");
+                    $('#name').val("");
+                },
+                error: function () {
+                    alert('Lỗi');
+                }
+            })
+        }
+    })
+</script>
+
+<style>
+    .add-btn, .add-zone {
+        width: 100%;
+    }
+
+    .add-btn {
+        height: 15%;
+        display: flex;
+    }
+
+        .add-btn .butn {
+            height: 100%;
+            width: 30%;
+            padding: 7px 80px;
+        }
+
+            .add-btn .butn button {
+                width: 100%;
+                height: 100%;
+                outline: none;
+                border: none;
+                border-radius: 0;
+                background-color: green;
+                color: white;
+            }
+
+                .add-btn .butn button:enabled:hover,
+                .add-btn .butn button:enabled:focus {
+                    background-color: lightgreen;
+                }
+
+        .add-btn .notify {
+            height: 100%;
+            width: 70%;
+            padding: 20px;
+            text-align: center;
+        }
+
+    .add-zone {
+        height: 85%;
+        background-color: #ffd295;
+        border-top: 1px solid gray;
+        display: flex;
+        justify-content: space-around;
+    }
+
+        .add-zone div {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 30px;
+        }
+</style>

@@ -1,0 +1,157 @@
+﻿@model NhaThuoc.Models.Thuoc
+
+
+<div style="height:405px;">
+    <div class="savechange-btn">
+        <div class="notify">
+
+        </div>
+        <div class="butn">
+            <button id="edit-save" disabled>Cập nhật</button>
+        </div>
+    </div>
+    <div class="edit-zone">
+        <div>
+            <label>Tên</label>
+            <input class="form-control" id="name" value="@Model.TenSP" type="text" />
+            <label>Đơn giá</label>
+            <input class="form-control" id="price" value="@Model.DonGia" type="number" min="0.0" />
+            <label>Trong kho</label>
+            <input class="form-control" id="instock" value="@Model.TrongKho" type="number" min="0" />
+            <label>Loại</label>
+            <select class="form-control" id="type">
+                <option value="@Model.Loai">@Model.Loai1.TenLoai</option>
+                <option value="CLH">Cảm lạnh, ho</option>
+                <option value="CXK">Cơ, xương khớp</option>
+                <option value="DD">Dạ dày</option>
+                <option value="GC">Giảm cân</option>
+                <option value="GDHS">Giảm đau, hạ sốt</option>
+                <option value="KDU">Kháng dị ứng</option>
+                <option value="PN">Phụ nữ</option>
+                <option value="SRTH">Siro trị ho</option>
+                <option value="TB">Táo bón</option>
+                <option value="TH">Tiêu hóa</option>
+                <option value="VK">Vitamin, khoáng chất</option>
+                <option value="VTYT">Vật tư y tế</option>
+                <option value="TPCN">Thực phẩm chức năng</option>
+            </select>
+        </div>
+        <div>
+            <label>Ảnh minh họa</label>
+            <input class="form-control" id="productimage" value="@Model.AnhMinhHoa" type="text" />
+            @{ 
+                string made = "yyyy-MM-dd", use = "yyyy-MM-dd";
+                if (Model.NgaySX != null && Model.HanSD != null)
+                {
+                    made = Model.NgaySX.Value.ToString("yyyy-MM-dd");
+                    use = Model.HanSD.Value.ToString("yyyy-MM-dd");
+                }
+            }
+            <label>Ngày sản xuất</label>
+            <input class="form-control" id="madeday" value="@made" type="date" />
+            <label>Hạn sử dụng</label>
+            <input class="form-control" id="useupto" value="@use" type="date" />
+            <label>Công dụng</label>
+            <input class="form-control" id="effect" value="@Model.CongDung" type="text" />
+            <input hidden id="id" value="@Model.MaSP" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $('input, select').change(function () {
+        $('#edit-save').removeAttr('disabled');
+    })
+
+    $('#edit-save').click(function () {
+        // declaration
+        var id = $('#id').val();
+        var name = $('#name').val();
+        var madeday = $('#madeday').val();
+        var useupto = $('#useupto').val();
+        var type = $('#type').val();
+        var instock = $('#instock').val();
+        var productimage = $('#productimage').val();
+        var price = $('#price').val();
+        var effect = $('#effect').val();
+        $.ajax({
+            url: "/Thuoc/modifyPro",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                id: id,
+                name: name,
+                madeday: madeday,
+                useupto: useupto,
+                type: type,
+                instock: instock,
+                productimage: productimage,
+                price: price,
+                effect: effect
+            },
+            success: function (response) {
+                $('.notify').html("<p style='color:green;font-size:20px;'>" + response.message + "</p>");
+            },
+            error: function () {
+                alert('Lỗi');
+            }
+        })
+    })
+</script>
+
+<style>
+    .savechange-btn, .edit-zone {
+        width: 100%;
+    }
+
+    .savechange-btn {
+        height: 15%;
+        display: flex;
+    }
+
+        .savechange-btn .butn {
+            height: 100%;
+            width: 30%;
+            padding: 7px 80px;
+        }
+
+            .savechange-btn .butn button {
+                width: 100%;
+                height: 100%;
+                outline: none;
+                border: none;
+                border-radius: 0;
+                background-color: green;
+                color: white;
+            }
+
+                .savechange-btn .butn button:enabled:hover,
+                .savechange-btn .butn button:enabled:focus {
+                    background-color: lightgreen;
+                }
+
+        .savechange-btn .notify {
+            height: 100%;
+            width: 70%;
+            padding: 20px;
+            text-align: center;
+        }
+
+    .edit-zone {
+        height: 85%;
+        background-color: antiquewhite;
+        border-top: 1px solid gray;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        display: flex;
+    }
+
+        .edit-zone div {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 30px;
+        }
+</style>

@@ -1,0 +1,184 @@
+﻿@model IEnumerable<NhaThuoc.Models.GioHang>
+
+<div class="wraper">
+    <div class="cart-grid">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-lg-3">Sản phẩm</th>
+                    <th class="col-lg-2">Số lượng</th>
+                    <th class="col-lg-2">Đơn giá</th>
+                    <th class="col-lg-2">Thành tiền</th>
+                    <th class="col-lg-2">Tùy chỉnh</th>
+                </tr>
+            </thead>
+            @foreach (var item in Model)
+            {
+                <tr id="row-@item.MaGH">
+                    <td class="col-lg-3" style="display:flex;justify-content:space-around;align-items:center;width:100%;">
+                        <div style="width:50%;"><img src="@item.Thuoc.AnhMinhHoa" height="45" width="45" /></div>
+                        <div style="width:50%;">@item.Thuoc.TenSP </div>
+                    </td>
+                    <td class="col-lg-2">x <input id="sl-@item.MaGH" type="number" value="@item.SoLuong" min="1" max="100" width="50" oninput="updateCart(@item.MaGH)" /></td>
+                    <td class="col-lg-2">@item.DonGia.ToString("0#,0") <input hidden id="dg-@item.MaGH" value="@item.DonGia" /></td>
+                    <td class="col-lg-2" id="purchase-@item.MaGH">@item.ThanhTien.ToString("0#,0")</td>
+                    <td class="col-lg-2" style="display:flex;justify-content:space-around;align-items:center;width:100%;">
+                        <button style="background-color:red;color:white;border:none;outline:none;" onclick="deleteItem(@item.MaGH, @item.MaKH)"><i class="glyphicon glyphicon-trash"></i></button>
+                        <button style="background-color: #1036cb;color: white;border: none;outline: none;"><i class="glyphicon glyphicon-info-sign"></i></button>
+                        <input hidden id="kh" value="@item.MaKH" />
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <div class="total">
+        <div style="display:flex; justify-content: space-between; flex-wrap: wrap;">
+            <h4>Tổng sản phẩm: <span id="total-item">@ViewBag.item</span></h4>
+            <h4>Tổng sản lượng: <span id="total-quantity">@ViewBag.quantity</span></h4>
+            <h3 style="margin-top: 10px;">Tổng thanh toán: <span id="total-money" style="color:red;">@ViewBag.money.ToString("0#,0")</span> đồng</h3>
+        </div>
+        <div class="cart-btn">
+            <button data-dismiss="modal" style="background-color: #003cff; color: white;"><i class="glyphicon glyphicon-shopping-cart"></i> Tiếp tục mua sắm</button>
+            <button style="background-color: #409200; color: white;" onclick="createBill()"><i class="glyphicon glyphicon-usd"></i> Thanh toán</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Purchase
+    var createBill = function () {
+        var kh = $('#kh').val();
+        $.ajax({
+            type: "POST",
+            url: "/GioHang/CreateBill",
+            data: {
+                kh: kh
+            },
+            success: function (response) {
+                $('#cart-detail #modal-body').html('<p>Đang chuyển trang...</p>');
+                setTimeout(function () {
+                    $('#cart-detail #modal-header').html('<h3 style="margin: 0;">Thanh toán</h3>');
+                    $('#cart-detail #modal-body').html(response);
+                }, 3000);
+            }
+        })
+    }
+    // Delete cart's item
+    var deleteItem = function (gh, kh) {
+        if (confirm('Bạn chắc muốn xóa khỏi giỏ ?')) {
+            $.ajax({
+                url: "/GioHang/Delete",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    gh: gh,
+                    kh: kh
+                },
+                success: function (response) {
+                    $('#total-quantity').text(response.quantity);
+                    $('#total-money').text(response.money);
+                    $('#total-item').text(response.item);
+                    $('#cart-count').text(response.item);
+                    var myobj = document.getElementById("row-" + gh);
+                    myobj.remove();
+                    alert('Xóa khỏi giỏ thành công');
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status + ' : ' + thrownError);
+                }
+            })
+        }
+    }
+    // Update cart's quantity
+    var updateCart = function (gh) {
+        var sl = $("#sl-" + gh).val();
+        var dg = $("#dg-" + gh).val();
+        var kh = $("#kh").val();
+        $.ajax({
+            url: "/GioHang/UpdateCart",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                soluong: sl,
+                gh: gh,
+                dongia: dg,
+                kh: kh
+            },
+            success: function (response) {
+                $('#total-quantity').text(response.quantity);
+                $('#total-money').text(response.money);
+                $('#purchase-' + gh).text(response.purchase);
+            },
+            error: function () {
+                alert('Có lỗi');
+            }
+        })
+    }
+</script>
+
+<style>
+  
+    .wraper {
+        width: 100%;
+        height: 400px;
+    }
+
+    .cart-grid {
+        width: 100%;
+        height: 75%;
+        padding-bottom: 5px;
+        overflow: auto;
+        border: 1px solid black;
+        background-color: antiquewhite;
+    }
+
+        .cart-grid table {
+            width: 100%;
+        }
+
+            .cart-grid table thead {
+                background-color: black;
+                color: white;
+            }
+
+                .cart-grid table tbody tr,
+                .cart-grid table thead tr th {
+                    text-align: center;
+                }
+
+            .cart-grid table tbody tr {
+                height: 50px;
+                background-color: #bfffa5;
+                color: black;
+                border-bottom: 1px solid #d6bebe;
+            }
+
+    .total {
+        width: 100%;
+        height: 25%;
+        padding: 5px 10px;
+        border: 1px solid black;
+        display: flex;
+    }
+
+        .total > div {
+            width: 50%;
+            padding: 5px;
+            color: black;
+        }
+
+    .cart-btn {
+        padding: 10px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+        .cart-btn button {
+            width: 35%;
+            height: 60%;
+            outline: none;
+            border: 1px solid black;
+            border-radius: 0;
+        }
+</style>

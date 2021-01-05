@@ -1,0 +1,232 @@
+﻿@model IEnumerable<NhaThuoc.Models.Thuoc>
+
+<div class="product-menu">
+    <div class="head">
+        <div>
+            <input id="keywords" value="" type="text" class="form-control" style="border-radius:0;height:100%;" placeholder="Tìm kiếm..." />
+            <select id="kind" style="border-radius:0;height:100%;">
+                <option value="id">Mã thuốc</option>
+                <option value="name">Tên thuốc</option>
+                <option value="kind">Loại</option>
+            </select>
+            <button id="search-btn" style="width: 50px;"><i class="glyphicon glyphicon-search"></i></button>
+        </div>
+        <div>
+            <button id="list-pro">Danh sách</button>
+            <button id="add">Thêm sản phẩm</button>
+        </div>
+
+    </div>
+    <div id="list">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-lg-1">Mã thuốc</th>
+                    <th class="col-lg-2">Tên thuốc</th>
+                    <th class="col-lg-1">Đơn giá</th>
+                    <th class="col-lg-1">Trong kho</th>
+                    <th class="col-lg-2">Ngày sản xuất</th>
+                    <th class="col-lg-2">Hạn sử dụng</th>
+                    <th class="col-lg-1">Đã bán</th>
+                    <th class="col-lg-2">Tùy chỉnh</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                <tr id="row-@item.MaSP">
+                    <td class="col-lg-1">@item.MaSP</td>
+                    <td class="col-lg-2">@item.TenSP</td>
+                    <td class="col-lg-1">@item.DonGia.Value.ToString("0#,0")</td>
+                    <td class="col-lg-1">@item.TrongKho</td>
+                    <td class="col-lg-2">@item.NgaySX.Value.ToString("dd-MM-yyyy")</td>
+                    <td class="col-lg-2">@item.HanSD.Value.ToString("dd-MM-yyyy")</td>
+                    <td class="col-lg-1">@item.DaBan</td>
+                    <td class="col-lg-1"><button onclick="modify(@item.MaSP)">Chỉnh sửa</button> <button onclick="remove(@item.MaSP)">Xóa</button></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSP">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" id="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var lastbtn = "list-pro";
+
+    $('#list-pro').click(function () {
+        var current = 'list-pro';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/Thuoc/list",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách thuốc');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    $('#add').click(function () {
+        var current = 'add';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/Thuoc/addProduct",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải trang thêm thuốc');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    var modify = function (maSP) {
+        $.ajax({
+            url: "/Thuoc/modifyProduct",
+            type: "GET",
+            data: {
+                maSP: maSP
+            },
+            success: function (response) {
+                $('#modalSP #modal-body').html(response);
+                $('#modalSP').modal('show');
+            },
+            error: function () {
+                alert('Không thể tải trang sửa sản phẩm');
+            }
+        })
+    }
+
+    var remove = function (maSP) {
+        if (confirm('Bạn có chắc muốn xóa thuốc khỏi cửa hàng?')) {
+            $.ajax({
+                url: "/Thuoc/removeProduct",
+                dataType: "JSON",
+                data: {
+                    maSP: maSP
+                },
+                success: function (response) {
+                    if (response.status == false) {
+                        alert(response.message);
+                    } else {
+                        var myobj = document.getElementById("row-" + maSP);
+                        myobj.remove();
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert('Không thể tải trang sửa sản phẩm');
+                }
+            })
+        }
+    }
+
+    $('#search-btn').click(function () {
+        var text = $('#keywords').val();
+        if (text == "") {
+            return;
+        } else {
+            var type = $('#kind').val();
+            $.ajax({
+                url: "/Thuoc/search",
+                type: "GET",
+                data: {
+                    text: text,
+                    type: type
+                },
+                success: function (response) {
+                    $('#list').html(response);
+                }
+            })
+        }
+    })
+</script>
+
+<style>
+    .product-menu {
+        width: 100%;
+        height: 100%;
+        color: black;
+    }
+
+    .product-menu .head {
+        width: 100%;
+        height: 15%;
+        display: flex;
+        align-content: center;
+        justify-content: space-around;
+    }
+
+    .product-menu .head div {
+        width: 40%;
+        height: 100%;
+        padding: 5px 20px;
+        display: flex;
+        align-items: center;
+    }
+
+        .product-menu .head div button {
+            border: 3px solid black;
+            outline: none;
+            border-radius: 0;
+            height: 100%;
+            background-color: black;
+            color: white;
+            font-weight: 600;
+        }
+
+    .product-menu #list {
+        width: 100%;
+        height: 85%;
+        background-color: azure;
+        border: 1px solid #b5b2b2;
+        overflow: auto;
+    }
+
+    #list-pro {
+        background-color: white;
+        color: black;
+    }
+
+    .product-menu #list table {
+        width: 100%;
+        font-size: 18px;
+    }
+
+    .product-menu #list table th {
+        background-color: black;
+        color: white;
+        text-align: center;
+    }
+
+    .product-menu #list table td {
+        text-align: center;
+        background-color: #bcd2ca;
+        height: 50px;
+        border-bottom: 1px solid gray;
+    }
+</style>

@@ -1,0 +1,180 @@
+﻿@using NhaThuoc.Models
+@{
+    ViewBag.Title = "Admin";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+
+    string avatar = "";
+    if (User.Identity.IsAuthenticated)
+    {
+        NHATHUOCEntities db = new NHATHUOCEntities();
+        avatar = (from u in db.Admins where u.Username == User.Identity.Name select u.AnhDaiDien).FirstOrDefault();
+    }
+}
+
+<div class="ad-nav">
+    <div class="board">
+        <div class="ad-info">
+            <h2 style="font-weight: 600; text-align: center; margin-bottom: 5px;">Quản trị viên</h2>
+            <div style="display: flex; width: 100%; justify-content: space-around; align-content: center;">
+                <div style="display: flex; width: 50%; justify-content: space-around; align-content: center;">
+                    <img src="@avatar" width="50" height="50" class="img-circle" />
+                    <h3 style="color: blue;text-align: center;margin: 0;">@User.Identity.Name</h3>
+                </div>
+            </div>
+        </div>
+        <div class="ad-btn">
+            <button id="bill" style="background-color: white; color: black;">
+                <h3>Đơn hàng</h3>
+            </button>
+            <button id="product">
+                <h3>Sản phẩm</h3>
+            </button>
+            <button id="account" style="border-top-right-radius:5px;border-bottom-right-radius:5px;">
+                <h3>Tài khoản</h3>
+            </button>
+        </div>
+    </div>
+</div>
+<div id="main-content">
+</div>
+
+<script>
+    // load bill list first
+    window.onload = function () {
+        $.ajax({
+            url: "/HoaDon/listBill",
+            type: "GET",
+            success: function (response) {
+                $('#main-content').html(response);
+            },
+            error: function (jqXHR) {
+                alert('Lỗi');
+            }
+        })
+    }
+    var previous = "bill";
+    $('#bill').click(function () {
+        var current = 'bill';
+        $('#' + previous).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != previous) {
+            $.ajax({
+                url: "/HoaDon/listBill",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#main-content').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách hóa đơn');
+                }
+            })
+        }
+        previous = current;
+    })
+
+    $('#account').click(function () {
+        var current = 'account';
+        $('#' + previous).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != previous) {
+            $.ajax({
+                url: "/Account/listAccount",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#main-content').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách tài khoản');
+                }
+            })
+        }
+        previous = current;
+    })
+
+    $('#product').click(function () {
+        var current = 'product';
+        $('#' + previous).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != previous) {
+            $.ajax({
+                url: "/Thuoc/listProduct",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#main-content').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách thuốc');
+                }
+            })
+        }
+        previous = current;
+    })
+</script>
+
+<style>
+    body {
+        background-color: #bbbb8b;
+    }
+
+    .ad-nav, .main-content {
+        width: 100%;
+    }
+
+    .ad-nav {
+        height: 150px;
+        padding: 20px 100px;
+    }
+
+        .ad-nav .board {
+            width: 100%;
+            height: 100%;
+            background-color: #ffee76;
+            color: black;
+            border: 5px solid black;
+            border-radius: 10px;
+            display: flex;
+        }
+
+    .ad-info {
+        height: 100%;
+        width: 30%;
+        border-right: 5px solid black;
+    }
+
+        .ad-info h2 {
+            margin-top: 5px;
+            border-bottom: 1px solid gray;
+        }
+
+    .ad-btn {
+        height: 100%;
+        width: 70%;
+        display: flex;
+    }
+
+        .ad-btn button {
+            width: 34%;
+            height: 100%;
+            background-color: black;
+            border: none;
+            outline: none;
+            border-radius: 0;
+            color: white;
+            flex-wrap: nowrap;
+            font-weight: 600;
+        }
+
+    #main-content {
+        height: 405px;
+        border-top: 5px solid black;
+        border-bottom: 5px solid black;
+        padding: 10px 100px;
+        background-color: bisque;
+    }
+</style>

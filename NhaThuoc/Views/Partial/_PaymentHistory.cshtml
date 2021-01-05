@@ -1,0 +1,90 @@
+﻿@model IEnumerable<NhaThuoc.Models.HoaDon>
+
+<table>
+    <thead>
+        <tr>
+            <th class="col-lg-1">Mã đơn</th>
+            <th class="col-lg-2">Tổng tiền</th>
+            <th class="col-lg-3">Địa chỉ giao</th>
+            <th class="col-lg-2">Ngày nhận đơn</th>
+            <th class="col-lg-2">Trạng thái</th>
+            <th class="col-lg-1">Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr id="row-@item.MaHD">
+            <td class="col-lg-1">@item.MaHD</td>
+            <td class="col-lg-2">@item.TongThanhToan.Value.ToString("0#,0") đồng</td>
+            <td class="col-lg-3">@item.DiaChiNhanHang</td>
+            <td class="col-lg-2">@item.NgayLapHD.Value.ToString("dd-MM-yyyy HH:mm")</td>
+            <td class="col-lg-2">
+                @if (item.TrangThai == "Đã giao hàng")
+                {<span style="color:green;">@item.TrangThai</span>}
+                else
+                { <span>@item.TrangThai</span>}
+            </td>
+            <td class="col-lg-1"><button onclick="openDetail(@item.MaHD)" style="background-color: blue; color: white; border: 1px solid black;"><i class="glyphicon glyphicon-info-sign"></i></button></td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="bill-detail">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0;">Chi tiết hóa đơn</h3>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDetail(MaHD) {
+        $.ajax({
+            type: "GET",
+            url: "/HoaDon/BillDetail",
+            data: { id: MaHD },
+            success: function (response) {
+                $('#bill-detail #modal-body').html(response);
+                $('#bill-detail').modal('show');
+            }
+        })
+    }
+</script>
+
+<style>
+    #main-content {
+        width: 100%;
+        height: 85%;
+        background-color: azure;
+        border: 1px solid #b5b2b2;
+        overflow: auto;
+    }
+
+        #main-content table {
+            width: 100%;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+            #main-content table th {
+                background-color: #827d7d;
+                color: white;
+                text-align: center;
+            }
+
+            #main-content table td {
+                text-align: center;
+                background-color: #ffb59f;
+                height: 50px;
+                border-bottom: 1px solid gray;
+            }
+            #main-content table td button{
+                height: 60%;
+            }
+</style>

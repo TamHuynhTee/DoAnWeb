@@ -1,0 +1,195 @@
+﻿@model NhaThuoc.Models.OrderInfoModel
+
+<div class="bill">
+    <div class="customer-info">
+        <div style="height: 20%; display: flex; justify-content: space-between;">
+            <p style="color: red;">Quý khách vui lòng điền đầy đủ thông tin phía dưới.</p>
+            <p style="text-align: right; font-weight: 600;">Thời gian đặt: @DateTime.Now.ToString("dd-MM-yyyy HH:mm")</p>
+        </div>
+        <div class="input-info">
+            <div><label>Tên khách:</label><input id="ten" class="form-control" value="@Model.khach.Ho_TenDem @Model.khach.TenKH" /></div>
+            <div><label>Email:</label><input id="mail" class="form-control" value="@Model.khach.TaiKhoan.Email" /></div>
+            <div><label>Số điện thoại:</label><input id="phone" class="form-control" value="@Model.khach.SDT" /></div>
+            <div><label>Địa chỉ giao:</label><input id="diachi" class="form-control" value="@Model.khach.DiaChi" /></div>
+        </div>
+    </div>
+    <div class="cart-item-info">
+        <table>
+            <tr>
+                <th class="col-lg-2">Thuốc</th>
+                <th class="col-lg-2">Số lượng</th>
+                <th class="col-lg-2">Đơn giá</th>
+                <th class="col-lg-2">Thành tiền</th>
+            </tr>
+            @foreach (var item in Model.gio)
+            {
+                <tr>
+                    <td class="col-lg-2">@item.Thuoc.TenSP</td>
+                    <td class="col-lg-2">@item.SoLuong</td>
+                    <td class="col-lg-2">@item.DonGia.ToString("0#,0")</td>
+                    <td class="col-lg-2">@item.ThanhTien.ToString("0#,0")</td>
+                </tr>
+            }
+        </table>
+    </div>
+    <div class="payment-info">
+        <div class="total">
+            <h4>Tổng sản phẩm: <span>@Model.tongSP</span></h4>
+            <h4>Tổng số lượng: <span>@Model.tongSL</span></h4>
+            <h3>Thành tiền: <span style="color:red;">@Model.tongTien.ToString("0#,0")</span> đồng</h3>
+        </div>
+        <div class="butn">
+            <button style="background-color: #003cff; color: white;" onclick="BacktoCart(@Model.khach.MaKH)"><i class="glyphicon glyphicon-shopping-cart"></i> Quay lại giỏ</button>
+            <button style="background-color: #409200; color: white;" onclick="ProceedPayment(@Model.khach.MaKH)"><i class="glyphicon glyphicon-lock"></i> Đặt hàng</button>
+            <div style="width: 100%; height: 50%; padding:5px 15px;">
+                <p>Lưu ý: Nếu bạn hủy đơn hàng trên 4 lần, hệ thống sẽ tự động khóa tài khoản của bạn.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Confirm payment
+    var ProceedPayment = function (customerID) {
+        if (confirm('Bạn đang xác nhận đặt hàng, hệ thống sẽ tự tạo hóa đơn cho bạn.')) {
+            var name = $('.input-info #ten').val();
+            var phone = $('.input-info #phone').val();
+            var email = $('.input-info #mail').val();
+            var address = $('.input-info #diachi').val();
+            $.ajax({
+                type: "POST",
+                dataType: "JSON",
+                url: "/GioHang/Purchase",
+                data: {
+                    kh: customerID,
+                    tenkh: name,
+                    SDT: phone,
+                    email: email,
+                    diachinhan: address
+                },
+                success: function (response) {
+                    $('#cart-detail #modal-body').html('<p style="text-align:center;">Đang xử lý...</p>');
+                    setTimeout(function () {
+                        var myobj = document.getElementById("modal-header");
+                        myobj.remove();
+                        $('#cart-detail #modal-body').html('<p style="text-align:center; color: #88B04B; font-size: 40px;">✓ Đã nhận đơn hàng</p>');
+                        $('#cart-count').text('0');
+                    }, 3000);
+                },
+                error: function () {
+                    alert('Có lỗi');
+                }
+            })
+        }
+    }
+    // Back to cart
+    var BacktoCart = function (customerID) {
+        $.ajax({
+            type: "GET",
+            url: "/GioHang/Index",
+            data: { makh: customerID },
+            success: function (response) {
+                $('#cart-detail #modal-header').html('<h3 style="margin: 0;">Giỏ hàng</h3>');
+                $('#cart-detail #modal-body').html(response);
+                $('#cart-detail').modal('show');
+            }
+        })
+    }
+</script>
+
+<style>
+    .bill {
+        width: 100%;
+        height: 500px;
+        display: block;
+        color: black;
+        font-family: 'Times New Roman';
+    }
+
+    .customer-info, .cart-item-info, .payment-info {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .customer-info {
+        height: 30%;
+    }
+
+        .customer-info .input-info {
+            width: 100%;
+            height: 80%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+            .customer-info .input-info div {
+                width: 45%;
+                height: 50%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+                .customer-info .input-info div label {
+                    color: blue;
+                }
+
+    .cart-item-info {
+        height: 50%;
+        overflow: auto;
+        background-color: #fbffba;
+    }
+
+        .cart-item-info table {
+            width: 100%;
+        }
+
+            .cart-item-info table th {
+                text-align: center;
+                background-color: darkorchid;
+                color: ghostwhite;
+            }
+
+            .cart-item-info table td {
+                border-bottom: 1px solid #e6d0d0;
+                text-align: center;
+            }
+
+    .payment-info {
+        height: 20%;
+        background-color: lavender;
+        display: flex;
+    }
+
+        .payment-info div {
+            width: 50%;
+            height: 100%;
+            padding: 10px;
+        }
+
+            .payment-info div h4, .payment-info div h3 {
+                margin-top: 5px;
+                font-weight: 600;
+            }
+
+        .payment-info .butn {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+            .payment-info .butn button {
+                width: 30%;
+                height: 50%;
+                border: none;
+                border-radius: 0;
+                outline: none;
+            }
+
+    .total {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+</style>

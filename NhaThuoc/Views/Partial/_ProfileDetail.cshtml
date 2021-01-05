@@ -1,0 +1,93 @@
+﻿@model NhaThuoc.Models._ProfileModel
+
+
+<div id="profile">
+    <div id="avatar">
+        <img src="@Model.AnhDaiDien" height="280" width="280" class="img-rounded" />
+        <h3 style="color:blue; font-weight: 600;">@Model.Username</h3>
+    </div>
+    <div id="info-detail">
+        <p>
+            <label>Họ tên:</label>
+            @if (Model.Ho_Dem != null || Model.Ten != null)
+            {
+                <span>@Model.Ho_Dem&ensp;@Model.Ten</span>
+            }
+            else
+            {
+                <span style="color:gray;">&lt;Chưa cập nhật&gt;</span>
+            }
+        </p>
+        <p>
+            <label>Số điện thoại:</label>
+            @if (Model.SDT != null)
+            {
+                <span>@Model.SDT</span>
+            }
+            else
+            {
+                <span style="color:gray;">&lt;Chưa cập nhật&gt;</span>
+            }
+        </p>
+        <p><label>Email:</label> @Model.Email</p>
+        <p><label>Giới tính:</label> @if (Model.GioiTinh == false)
+        {<span>Nam</span> }
+        else
+        { <span>Nữ</span>}</p>
+        <p>
+            <label>Ngày sinh:</label>
+            @if (Model.NgaySinh != null)
+            {
+                <span>
+                    @Model.NgaySinh.Value.ToString("dd-MM-yyyy")
+                </span>
+            }
+            else
+            {
+                <span style="color:gray;">&lt;Chưa cập nhật&gt;</span>
+            }
+        </p>
+        <p>
+            <label>Địa chỉ:</label>
+            @if (Model.DiaChi != null)
+            {
+                <span>@Model.DiaChi</span>
+            }
+            else
+            {
+                <span style="color:gray;">&lt;Chưa cập nhật&gt;</span>
+            }
+        </p>
+    </div>
+</div>
+
+<style>
+    #profile {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 30px;
+    }
+
+    #avatar {
+        height: 100%;
+        width: 40%;
+        padding: 20px;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    #info-detail {
+        height: 100%;
+        width: 55%;
+        border: 1px solid black;
+        background-color: #fff0f0;
+        border-radius: 10px;
+        padding: 20px;
+        font-size: 23px;
+        font-family: 'Times New Roman';
+        color: black;
+    }
+</style>

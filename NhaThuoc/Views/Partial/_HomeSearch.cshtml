@@ -1,0 +1,26 @@
+﻿@model IEnumerable<NhaThuoc.Models.Thuoc>
+
+@foreach (var item in Model)
+{
+    <div class="item-s">
+        <div class="item-image">
+            <img src="@item.AnhMinhHoa" />
+        </div>
+        <div class="item-info">
+            <label id="item-cate">@item.Loai1.TenLoai</label>
+            <p id="item-name">@item.TenSP</p>
+        </div>
+        <div class="item-btn">
+            <button id="retail-price">@item.DonGia.Value.ToString("0#,0") &#8363;</button>
+            <button id="item-detail" onclick="ProductDetail(@item.MaSP)"><i class="glyphicon glyphicon-info-sign"></i></button>
+            @if (User.IsInRole("admin"))
+            {
+                <button id="item-to-cart" disabled><i class="glyphicon glyphicon-shopping-cart"></i></button>
+            }
+            else
+            {
+                <button id="item-to-cart" onclick="AddtoCart(@item.MaSP, @ViewBag.kh)"><i class="glyphicon glyphicon-shopping-cart"></i></button>
+            }
+        </div>
+    </div>
+}

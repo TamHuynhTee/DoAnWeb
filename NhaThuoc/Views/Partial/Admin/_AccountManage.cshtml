@@ -1,0 +1,234 @@
+﻿@model IEnumerable<NhaThuoc.Models.KhachHang>
+
+<div class="acc-menu">
+    <div class="head">
+        <div>
+            <input id="keywords" value="" type="text" class="form-control" style="border-radius:0;height:100%;" placeholder="Tìm kiếm..." />
+            <select id="kind" style="border-radius:0;height:100%;">
+                <option value="username">Tài khoản</option>
+                <option value="name">Tên</option>
+                <option value="email">Email</option>
+                <option value="phone">Điện thoại</option>
+            </select>
+            <button id="search-btn" style="width: 50px;"><i class="glyphicon glyphicon-search"></i></button>
+        </div>
+        <div>
+            <button id="list-user">Danh sách</button>
+            <button id="add-user">Thêm nhanh tài khoản</button>
+        </div>
+    </div>
+    <div id="list">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-lg-1">Username</th>
+                    <th class="col-lg-2">Họ tên</th>
+                    <th class="col-lg-1">Giới tính</th>
+                    <th class="col-lg-2">Email</th>
+                    <th class="col-lg-2">Điện thoại</th>
+                    <th class="col-lg-1">Số lần hủy đơn</th>
+                    <th class="col-lg-2">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="col-lg-1">@item.Username</td>
+                        <td class="col-lg-2">
+                            @if (item.Ho_TenDem == null && item.TenKH == null)
+                            {<span>&lt;Chưa cập nhật&gt;</span>}
+                            else
+                            {<span>@item.Ho_TenDem @item.TenKH</span>}
+                    </td>
+                    <td class="col-lg-1">
+                        @if (item.GioiTinh == null)
+                        {
+                            <span>&lt;Chưa cập nhật&gt;</span>
+                        }
+                        else
+                        {
+                            if (item.GioiTinh == false)
+                            {<span>Nam</span>}
+                            else
+                            {<span>Nữ</span>}
+                        }
+                    </td>
+                    <td class="col-lg-2">@item.TaiKhoan.Email</td>
+                    <td class="col-lg-2">
+                        @if (item.SDT == null)
+                        {
+                            <span>&lt;Chưa cập nhật&gt;</span>
+                        }
+                        else
+                        {
+                            @item.SDT
+                        }
+                    </td>
+                    <td class="col-lg-2">@item.SoLanHuyDon</td>
+                    <td class="col-lg-1">
+                        @if (item.TaiKhoan.Block == false)
+                        {<button id="block-@item.MaKH" style="background-color:green;color:white;" onclick="block(@item.MaKH)">Đang dùng</button> }
+                        else
+                        { <button id="block-@item.MaKH" style="background-color:red;color:white;" onclick="block(@item.MaKH)">Khóa</button>}
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    var lastbtn = "list-user";
+
+    $('#list-user').click(function () {
+        var current = 'list-user';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/Account/listAcc",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách tài khoản');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    $('#add-user').click(function () {
+        var current = 'add-user';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/Account/addUser",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải trang thêm tài khoản');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    var block = function (id) {
+        $.ajax({
+            url: "/Account/Block",
+            dataType: "JSON",
+            type: "POST",
+            data: { kh: id },
+            success: function (response) {
+                if (response.state == true) {
+                    $('#block-' + id).css('background-color', 'red');
+                    $('#block-' + id).text('Khóa');
+                    alert('Đã khóa tài khoản');
+                } else {
+                    $('#block-' + id).css('background-color', 'green');
+                    $('#block-' + id).text('Đang dùng');
+                    alert('Đã kích hoạt tài khoản');
+                }
+            },
+            error: function () {
+                alert('Xảy ra lỗi khi kích hoạt/khóa tài khoản');
+            }
+        })
+    }
+
+    $('#search-btn').click(function () {
+        var text = $('#keywords').val();
+        if (text == "") {
+            return;
+        } else {
+            var type = $('#kind').val();
+            $.ajax({
+                url: "/Account/search",
+                type: "GET",
+                data: {
+                    text: text,
+                    type: type
+                },
+                success: function (response) {
+                    $('#list').html(response);
+                }
+            })
+        }
+    })
+</script>
+<style>
+    .acc-menu {
+        width: 100%;
+        height: 100%;
+        color: black;
+    }
+
+        .acc-menu .head {
+            width: 100%;
+            height: 15%;
+            display: flex;
+            align-content: center;
+            justify-content: space-around;
+        }
+
+            .acc-menu .head div {
+                width: 40%;
+                height: 100%;
+                padding: 5px 20px;
+                display: flex;
+                align-items: center;
+            }
+
+                .acc-menu .head div button {
+                    border: 3px solid black;
+                    outline: none;
+                    border-radius: 0;
+                    height: 100%;
+                    background-color: black;
+                    color: white;
+                    font-weight: 600;
+                }
+
+        .acc-menu #list {
+            width: 100%;
+            height: 85%;
+            background-color: azure;
+            border: 1px solid #b5b2b2;
+            overflow: auto;
+        }
+
+    #list-user {
+        background-color: white;
+        color: black;
+    }
+
+    .acc-menu #list table {
+        width: 100%;
+        font-size: 18px;
+    }
+
+        .acc-menu #list table th {
+            background-color: black;
+            color: white;
+            text-align: center;
+        }
+
+        .acc-menu #list table td {
+            text-align: center;
+            background-color: #bcd2ca;
+            height: 50px;
+            border-bottom: 1px solid gray;
+        }
+</style>
+

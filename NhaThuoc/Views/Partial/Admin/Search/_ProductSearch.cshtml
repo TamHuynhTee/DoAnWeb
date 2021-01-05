@@ -1,0 +1,31 @@
+﻿@model IEnumerable<NhaThuoc.Models.Thuoc>
+
+<table>
+    <thead>
+        <tr>
+            <th class="col-lg-1">Mã thuốc</th>
+            <th class="col-lg-2">Tên thuốc</th>
+            <th class="col-lg-1">Đơn giá</th>
+            <th class="col-lg-1">Trong kho</th>
+            <th class="col-lg-2">Ngày sản xuất</th>
+            <th class="col-lg-2">Hạn sử dụng</th>
+            <th class="col-lg-1">Đã bán</th>
+            <th class="col-lg-2">Tùy chỉnh</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="row-@item.MaSP">
+                <td class="col-lg-1">@item.MaSP</td>
+                <td class="col-lg-2">@item.TenSP</td>
+                <td class="col-lg-1">@item.DonGia.Value.ToString("0#,0")</td>
+                <td class="col-lg-1">@item.TrongKho</td>
+                <td class="col-lg-2">@item.NgaySX.Value.ToString("dd-MM-yyyy")</td>
+                <td class="col-lg-2">@item.HanSD.Value.ToString("dd-MM-yyyy")</td>
+                <td class="col-lg-1">@item.DaBan</td>
+                <td class="col-lg-1"><button onclick="modify(@item.MaSP)">Chỉnh sửa</button> <button onclick="remove(@item.MaSP)">Xóa</button></td>
+            </tr>
+        }
+    </tbody>
+</table>

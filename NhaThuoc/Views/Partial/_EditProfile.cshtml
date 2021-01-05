@@ -1,0 +1,134 @@
+﻿@model NhaThuoc.Models._ProfileModel
+
+
+<div class="savechange-btn">
+    <div class="notify">
+
+    </div>
+    <div class="butn">
+        <button id="edit-save" disabled>Lưu thay đổi</button>
+    </div>
+</div>
+<div class="edit-zone">
+    <div>
+        <label>Họ, tên đệm</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="lname" value="@Model.Ho_Dem" type="text"/>
+        <label>Tên</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="fname" value="@Model.Ten" type="text"/>
+        <label>Số điện thoại</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="phone" value="@Model.SDT" type="text"/>
+        <label>Giới tính</label>
+        <select class="form-control" id="gender">
+            <option value="False">Nam</option>
+            <option value="True">Nữ</option>
+        </select>
+    </div>
+    <div>
+        <label>Email</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="email" value="@Model.Email" type="email" />
+        @{
+            string date = "yyyy-MM-dd";
+            if (Model.NgaySinh != null)
+            {
+                date = Model.NgaySinh.Value.ToString("yyyy-MM-dd");
+            }
+        }
+        <label>Ngày sinh</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="birthday" value="@date" type="date" max="2020-12-31" min="1920-12-31" />
+        <label>Địa chỉ</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="addr" value="@Model.DiaChi" type="text" />
+        <label>Nguồn ảnh</label>
+        <input class="form-control" placeholder="Chưa cập nhật" id="avatar" value="@Model.AnhDaiDien" type="text" />
+        <input hidden id="user" value="@Model.Username" />
+    </div>
+</div>
+
+<script>
+    $('input, select').change(function () {
+        $('#edit-save').removeAttr('disabled');
+    })
+
+    $('#edit-save').click(function () {
+        var username = $('#user').val();
+        var fname = $('#fname').val();
+        var lname = $('#lname').val();
+        var phone = $('#phone').val();
+        var gender = $('#gender').val();
+        var email = $('#email').val();
+        var birthday = $('#birthday').val();
+        var addr = $('#addr').val();
+        var avatar = $('#avatar').val();
+        $.ajax({
+            url: "/Account/MakeProfileChange",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                username: username,
+                fname: fname,
+                lname: lname,
+                phone: phone,
+                gender: gender,
+                email: email,
+                birthday: birthday,
+                addr: addr,
+                avatar: avatar
+            },
+            success: function (response) {
+                $('.notify').html("<p style='color:green;font-size:20px;'>" + response.message + "</p>");
+            },
+            error: function () {
+                alert('Lỗi');
+            }
+        })
+    })
+</script>
+
+<style>
+    .savechange-btn, .edit-zone{
+        width: 100%;
+    }
+    .savechange-btn{
+        height: 15%;
+        display: flex;
+    }
+        .savechange-btn .butn {
+            height: 100%;
+            width: 30%;
+            padding: 7px 80px;
+        }
+        .savechange-btn .butn button{
+            width: 100%;
+            height: 100%;
+            outline: none;
+            border: none;
+            border-radius: 0;
+            background-color: green;
+            color: white;
+        }
+            .savechange-btn .butn button:enabled:hover,
+            .savechange-btn .butn button:enabled:focus {
+                background-color: lightgreen;
+            }
+            .savechange-btn .notify {
+                height: 100%;
+                width: 70%;
+                padding: 20px;
+                text-align: center;
+            }
+    .edit-zone {
+        height: 85%;
+        background-color: antiquewhite;
+        border-top: 1px solid gray;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        display: flex;
+    }
+    .edit-zone div{
+        width: 50%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 30px;
+    }
+</style>

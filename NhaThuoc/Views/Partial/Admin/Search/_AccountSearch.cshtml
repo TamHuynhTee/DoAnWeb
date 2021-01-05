@@ -1,0 +1,60 @@
+﻿@model IEnumerable<NhaThuoc.Models.KhachHang>
+
+<table>
+    <thead>
+        <tr>
+            <th class="col-lg-1">Username</th>
+            <th class="col-lg-2">Họ tên</th>
+            <th class="col-lg-1">Giới tính</th>
+            <th class="col-lg-2">Email</th>
+            <th class="col-lg-2">Điện thoại</th>
+            <th class="col-lg-1">Số lần hủy đơn</th>
+            <th class="col-lg-2">Trạng thái</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="col-lg-1">@item.Username</td>
+                <td class="col-lg-2">
+                    @if (item.Ho_TenDem == null && item.TenKH == null)
+                    {<span>&lt;Chưa cập nhật&gt;</span>}
+                    else
+                    {<span>@item.Ho_TenDem @item.TenKH</span>}
+                </td>
+                <td class="col-lg-1">
+                    @if (item.GioiTinh == null)
+                    {
+                        <span>&lt;Chưa cập nhật&gt;</span>
+                    }
+                    else
+                    {
+                        if (item.GioiTinh == false)
+                        {<span>Nam</span>}
+                        else
+                        {<span>Nữ</span>}
+                    }
+                </td>
+                <td class="col-lg-2">@item.TaiKhoan.Email</td>
+                <td class="col-lg-2">
+                    @if (item.SDT == null)
+                    {
+                        <span>&lt;Chưa cập nhật&gt;</span>
+                    }
+                    else
+                    {
+                        @item.SDT
+                    }
+                </td>
+                <td class="col-lg-2">@item.SoLanHuyDon</td>
+                <td class="col-lg-1">
+                    @if (item.TaiKhoan.Block == false)
+                    {<button id="block-@item.MaKH" style="background-color:green;color:white;" onclick="block(@item.MaKH)">Đang dùng</button> }
+                    else
+                    { <button id="block-@item.MaKH" style="background-color:red;color:white;" onclick="block(@item.MaKH)">Khóa</button>}
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

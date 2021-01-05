@@ -1,0 +1,9 @@
+﻿@model IEnumerable<NhaThuoc.Models.DanhGiaSP>
+
+@foreach (var item in Model)
+{
+    <div id="comment">
+        <label style="color:blue;">@item.TaiKhoan</label>&emsp;<label>@item.ThoiGianDang.ToString("dd-MM-yyyy HH:mm")</label>
+        <p>@item.NoiDungDinhGia</p>
+    </div>
+}

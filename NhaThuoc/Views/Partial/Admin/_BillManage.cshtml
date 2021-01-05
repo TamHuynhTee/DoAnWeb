@@ -1,0 +1,238 @@
+﻿@model IEnumerable<NhaThuoc.Models.HoaDon>
+
+<div class="bill-menu">
+    <div class="head">
+        <div>
+            <input id="keywords" value="" type="text" class="form-control" style="border-radius:0;height:100%;" placeholder="Tìm kiếm..." />
+            <select id="kind" style="border-radius:0;height:100%;">
+                <option value="id">Mã hóa đơn</option>
+                <option value="name">Tên khách</option>
+                <option value="email">Email khách</option>
+                <option value="phone">Điện thoại</option>
+                <option value="address">Địa chỉ</option>
+            </select>
+            <button id="search-btn" style="width: 50px;"><i class="glyphicon glyphicon-search"></i></button>
+        </div>
+        <div>
+            <button id="received">Đã nhận đơn</button>
+            <button id="processing">Đang xử lý</button>
+            <button id="transfered">Đã giao hàng</button>
+        </div>
+        
+    </div>
+    <div id="list-bill">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-lg-1">Mã đơn</th>
+                    <th class="col-lg-2">Tên khách</th>
+                    <th class="col-lg-2">Số tiền</th>
+                    <th class="col-lg-3">Địa chỉ giao</th>
+                    <th class="col-lg-2">Ngày nhận đơn</th>
+                    <th class="col-lg-2">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.MaHD">
+                        <td class="col-lg-1">@item.MaHD</td>
+                        <td class="col-lg-2">@item.TenKhach</td>
+                        <td class="col-lg-2">@item.TongThanhToan.Value.ToString("0#,0") đồng</td>
+                        <td class="col-lg-3">@item.DiaChiNhanHang</td>
+                        <td class="col-lg-2">@item.NgayLapHD.Value.ToString("dd-MM-yyyy HH:mm")</td>
+                        <td class="col-lg-2"><button onclick="toProcess(@item.MaHD)">Xử lý</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    var lastbtn = "received";
+
+    $('#received').click(function () {
+        var current = 'received';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/HoaDon/listReceived",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list-bill').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách tài khoản');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    $('#processing').click(function () {
+        var current = 'processing';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/HoaDon/listProccessing",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list-bill').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách đơn đang xử lý');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    $('#transfered').click(function () {
+        var current = 'transfered';
+        $('#' + lastbtn).css({ 'background-color': 'black', 'color': 'white' });
+        $(this).css({ 'background-color': 'white', 'color': 'black' });
+        // you're not in current page
+        if (current != lastbtn) {
+            $.ajax({
+                url: "/HoaDon/listCompleted",
+                type: "GET",
+                success: function (response) {
+                    // load partial page
+                    $('#list-bill').html(response);
+                },
+                error: function (jqXHR) {
+                    alert('Không thể tải danh sách đơn đã giao');
+                }
+            })
+        }
+        lastbtn = current;
+    })
+
+    var toProcess = function (maHD) {
+        $.ajax({
+            url: "/HoaDon/toProccess",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                hd: maHD
+            },
+            success: function (response) {
+                var myobj = document.getElementById("row-" + maHD);
+                myobj.remove();
+                alert(response.message);
+            },
+            error: function () {
+                alert('Có sự cố khi chuyển trạng thái');
+            }
+        })
+    }
+
+    var toComplete = function (maHD) {
+        $.ajax({
+            url: "/HoaDon/toComplete",
+            type: "POST",
+            dataType: "JSON",
+            data: {
+                hd: maHD
+            },
+            success: function (response) {
+                var myobj = document.getElementById("row-" + maHD);
+                myobj.remove();
+                alert(response.message);
+            },
+            error: function () {
+                alert('Có sự cố khi chuyển trạng thái');
+            }
+        })
+    }
+
+    $('#search-btn').click(function () {
+        var text = $('#keywords').val();
+        if (text == "") {
+            return;
+        } else {
+            var type = $('#kind').val();
+            $.ajax({
+                url: "/HoaDon/search",
+                type: "GET",
+                data: {
+                    text: text,
+                    type: type
+                },
+                success: function (response) {
+                    $('#list-bill').html(response);
+                }
+            })
+        }
+    })
+</script>
+
+<style>
+    .bill-menu {
+        width: 100%;
+        height: 100%;
+        color: black;
+    }
+
+        .bill-menu .head {
+            width: 100%;
+            height: 15%;
+            display: flex;
+            align-content: center;
+            justify-content: space-around;
+        }
+            .bill-menu .head div {
+                width: 40%;
+                height: 100%;
+                padding: 5px 20px;
+                display: flex;
+                align-items: center;
+            }
+                .bill-menu .head div button {
+                    border: 3px solid black;
+                    outline: none;
+                    border-radius: 0;
+                    height: 100%;
+                    background-color: black;
+                    color: white;
+                    font-weight: 600;
+                }
+
+        .bill-menu #list-bill {
+            width: 100%;
+            height: 85%;
+            background-color: azure;
+            border: 1px solid #b5b2b2;
+            overflow: auto;
+        }
+
+                #received {
+                    background-color: white;
+                    color: black;
+                }
+
+    .bill-menu #list-bill table {
+        width: 100%;
+        font-size: 18px;
+    }
+
+        .bill-menu #list-bill table th {
+            background-color: black;
+            color: white;
+            text-align: center;
+        }
+
+        .bill-menu #list-bill table td {
+            text-align: center;
+            background-color: #bcd2ca;
+            height: 50px;
+            border-bottom: 1px solid gray;
+        }
+</style>

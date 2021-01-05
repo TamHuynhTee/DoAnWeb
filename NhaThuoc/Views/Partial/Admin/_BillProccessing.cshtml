@@ -1,0 +1,27 @@
+﻿@model IEnumerable<NhaThuoc.Models.HoaDon>
+
+<table>
+    <thead>
+        <tr>
+            <th class="col-lg-1">Mã đơn</th>
+            <th class="col-lg-2">Tên khách</th>
+            <th class="col-lg-2">Số tiền</th>
+            <th class="col-lg-3">Địa chỉ giao</th>
+            <th class="col-lg-2">Ngày nhận đơn</th>
+            <th class="col-lg-2">Tùy chỉnh</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="row-@item.MaHD">
+                <td class="col-lg-1">@item.MaHD</td>
+                <td class="col-lg-2">@item.TenKhach</td>
+                <td class="col-lg-2">@item.TongThanhToan.Value.ToString("0#,0") đồng</td>
+                <td class="col-lg-3">@item.DiaChiNhanHang</td>
+                <td class="col-lg-2">@item.NgayLapHD.Value.ToString("dd-MM-yyyy HH:mm")</td>
+                <td class="col-lg-1"><button onclick="toComplete(@item.MaHD)">Hoàn tất</button></td>
+            </tr>
+        }
+    </tbody>
+</table>

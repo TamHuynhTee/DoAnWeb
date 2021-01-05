@@ -1,0 +1,162 @@
+﻿
+<div class="add-btn">
+    <div class="notify">
+
+    </div>
+    <div class="butn">
+        <button id="add-save">Thêm</button>
+    </div>
+</div>
+<div class="add-zone">
+    <div>
+        <label>Tên thuốc</label>
+        <input class="form-control" placeholder="Tên thuốc" id="name" type="text" />
+        <label>Ngày sản xuất</label>
+        <input class="form-control" id="madeday" value="" type="date" />
+        <label>Hạn sử dụng</label>
+        <input class="form-control" id="useupto" value="" type="date" />
+        <label>Loại</label>
+        <select class="form-control" id="type">
+            <option value="CLH">Cảm lạnh, ho</option>
+            <option value="CXK">Cơ, xương khớp</option>
+            <option value="DD">Dạ dày</option>
+            <option value="GC">Giảm cân</option>
+            <option value="GDHS">Giảm đau, hạ sốt</option>
+            <option value="KDU">Kháng dị ứng</option>
+            <option value="PN">Phụ nữ</option>
+            <option value="SRTH">Siro trị ho</option>
+            <option value="TB">Táo bón</option>
+            <option value="TH">Tiêu hóa</option>
+            <option value="VK">Vitamin, khoáng chất</option>
+            <option value="VTYT">Vật tư y tế</option>
+            <option value="TPCN">Thực phẩm chức năng</option>
+        </select>
+    </div>
+    <div>
+        <label>Trong kho</label>
+        <input class="form-control" id="instock" value="0" type="number" min="1" />
+        <label>Ảnh minh họa</label>
+        <input class="form-control" placeholder="Ảnh minh họa" id="productimage" value="" type="text" />
+        <label>Đơn giá</label>
+        <input class="form-control" id="price" value="0.0" type="number" min="0" step="0.1" />
+        <label>Công dụng</label>
+        <input class="form-control" placeholder="Công dụng" id="effect" value="" type="text" />
+    </div>
+</div>
+
+<script>
+    $('#add-save').click(function () {
+        // declaration
+        var name = $('#name').val();
+        var madeday = $('#madeday').val();
+        var useupto = $('#useupto').val();
+        var type = $('#type').val();
+        var instock = $('#instock').val();
+        var productimage = $('#productimage').val();
+        var price = $('#price').val();
+        var effect = $('#effect').val();
+        // validation
+        if (name == "") {//&& &&  && ) {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập tên thuốc</p>"); return;
+        }else if (madeday == "") {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập ngày sản xuất</p>"); return;
+        }else if (useupto == "") {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập hạn sử dụng</p>"); return;
+        } else if (instock == 0) {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng nhập lượng trong kho</p>"); return;
+        } else if (price == 0.0) {
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng cập nhật đơn giá</p>"); return;
+        }else if(effect == ""){
+            $('.notify').html("<p style='color:red;font-size:18px;'>Vui lòng chỉ rõ công dụng</p>"); return;
+        }else {
+            $.ajax({
+                url: "/Thuoc/Add",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    name: name,
+                    madeday: madeday,
+                    useupto: useupto,
+                    type: type,
+                    instock: instock,
+                    productimage: productimage,
+                    price: price,
+                    effect: effect
+                },
+                success: function (response) {
+                    if (response.status == false) {
+                        $('.notify').html("<p style='color:blue;font-size:20px;'>" + response.message + "</p>");
+                    }
+                    else {
+                        $('.notify').html("<p style='color:green;font-size:20px;'>" + response.message + "</p>");
+                        $('#name').val("");
+                        $('#madeday').val("");
+                        $('#useupto').val("");
+                        $('#instock').val(0);
+                        $('#productimage').val("");
+                        $('#price').val(0.0);
+                        $('#effect').val("");
+                    }
+                },
+                error: function () {
+                    alert('Lỗi');
+                }
+            })
+        }
+    })
+</script>
+
+<style>
+    .add-btn, .add-zone {
+        width: 100%;
+    }
+
+    .add-btn {
+        height: 15%;
+        display: flex;
+    }
+
+        .add-btn .butn {
+            height: 100%;
+            width: 30%;
+            padding: 7px 80px;
+        }
+
+            .add-btn .butn button {
+                width: 100%;
+                height: 100%;
+                outline: none;
+                border: none;
+                border-radius: 0;
+                background-color: green;
+                color: white;
+            }
+
+                .add-btn .butn button:enabled:hover,
+                .add-btn .butn button:enabled:focus {
+                    background-color: lightgreen;
+                }
+
+        .add-btn .notify {
+            height: 100%;
+            width: 70%;
+            padding: 20px;
+            text-align: center;
+        }
+
+    .add-zone {
+        height: 85%;
+        background-color: #ffd295;
+        border-top: 1px solid gray;
+        display: flex;
+    }
+
+        .add-zone div {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 30px;
+        }
+</style>
